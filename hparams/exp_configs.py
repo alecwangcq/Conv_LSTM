@@ -10,7 +10,7 @@ from misc.utils import pack
 def MMNIST_CONV_LSTM(extra_info):
     _KEYS = ['encoder_configs', 'reconstruct_configs', 'predict_configs']
     h_c = 16
-    active_func = nn.ReLU()
+    active_func = nn.Tanh()
     in_c = 1
     in_h = 64
     in_w = 64
