@@ -3,6 +3,10 @@ from .register import register
 import pickle
 
 
+@register("MMNIST_CONV_LSTM")
+def MMNIST_CONV_LSTM(extra_info):
+    pass
+
 @register("CAPTION_GNN_CONTRASTIVE")
 def CAPTION_GNN_CONTRASTIVE(extra_info):
     root = './data'
