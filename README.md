@@ -33,6 +33,7 @@ np.save('./data/mmnist_test.npy', test)
 ```
 
 ## Run
+```
 python main.py --hparams=MMNIST_CONV_LSTM
-
+```
 
