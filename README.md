@@ -1,8 +1,6 @@
 # TODO
 ------------------------
-# Conv_LSTM(-RNN-GRU)
-## References
-Conv LSTM/GRU/RNN. See [Convolutional LSTM Network: A Machine Learning Approach for Precipitation Nowcasting](https://arxiv.org/abs/1506.04214). 
+
 
 ## download Moving MNIST
 See this [link](http://www.cs.toronto.edu/~nitish/unsupervised_video/), or [download](http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy) directly.
@@ -34,8 +32,4 @@ np.save('./data/mmnist_val.npy', val)
 np.save('./data/mmnist_test.npy', test)
 ```
 
-## Run
-```
-python main.py --hparams=MMNIST_CONV_LSTM
-```
 
