@@ -44,6 +44,7 @@ class MMNIST_ConvLSTM(nn.Module):
         p_res = []
         p_x = None
         p_states = states
+        # print ('start from p')
         for t in xrange(time_steps):
             p_data = pack([p_x, p_states], ['x', 'states'])
             p_out, p_states = predictor(p_data)

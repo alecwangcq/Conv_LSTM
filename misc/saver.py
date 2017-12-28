@@ -30,7 +30,7 @@ class Saver(object):
 
         torch.save(contents, filename)
 
-        if latest_metric > self.best_metric:
+        if latest_metric < self.best_metric:
             self.best_metric = latest_metric
             save_name = 'best_' + self.metric_name + '.pth.tar'
             save_name = os.path.join(output_path, save_name)

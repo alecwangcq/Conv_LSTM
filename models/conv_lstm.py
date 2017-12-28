@@ -48,6 +48,8 @@ class ConvLSTMCell(nn.Module):
         x, states = unpack(data, _KEYS)
         h, c = states
         active_func = self.active_func
+        # print (x.size())
+        # print (h.size())
         concat_hx = torch.cat([x, h], 1)
         # print(concat_hx.size())
         conv_hx = self.conv2d(concat_hx)
@@ -88,7 +90,7 @@ class ConvLSTM(nn.Module):
     def forward(self, data, configs=None):
         _KEYS = ['x', 'states']
         x, states = unpack(data, _KEYS)
-        batch_size = len(states)
+        batch_size = states[0][0].size(0)
         if x is None:
             x_c, x_h, x_w = self.cell_config['in_c'], self.cell_config['in_w'], self.cell_config['in_h']
             x = to_var(torch.zeros(batch_size, 1, x_c, x_h, x_w))
@@ -101,7 +103,6 @@ class ConvLSTM(nn.Module):
             h0, c0 = states[l]
             for t in xrange(time_steps):
                 data = pack([current_input[t],(h0, c0)], ['x', 'states'])
-                print (data)
                 h, c = cell_list[l](data)
                 next_states.append((h, c))
                 current_input[t] = h

@@ -1,93 +1,76 @@
 from .hparams import HParams
 from .register import register
 import pickle
+import torch.nn as nn
+from models.conv_lstm import ConvLSTMCell, ConvLSTM
+from misc.utils import pack
 
 
 @register("MMNIST_CONV_LSTM")
 def MMNIST_CONV_LSTM(extra_info):
-    pass
+    _KEYS = ['encoder_configs', 'reconstruct_configs', 'predict_configs']
+    h_c = 16
+    active_func = nn.Tanh()
+    in_c = 1
+    in_h = 64
+    in_w = 64
+    kernel_size = 5
+    DEBUG = True
 
-@register("CAPTION_GNN_CONTRASTIVE")
-def CAPTION_GNN_CONTRASTIVE(extra_info):
-    root = './data'
-    dataset = 'refcocog'
-    split_by = 'google'
-    name = 'CAP_GNN'
-    vocab = pickle.load(open('./data/refcocog/vocab/google/vocab.pkl', 'r'))
-    trainloader_info = {
-        'name': name,
-        'root': root,
-        'dataset': dataset,
-        'split_by': split_by,
-        'split': 'train',
-        'vocab': vocab,
-        'batch_size': 20,
+    num_layers = 3
+    cell_conf_l0 = pack([h_c, active_func, in_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
+    cell_conf_l1 = pack([h_c, active_func, h_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
+    cell_conf_l2 = pack([h_c, active_func, h_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
+    cell_configs = [cell_conf_l0, cell_conf_l1, cell_conf_l2]
+
+    encoder_configs = pack([num_layers, cell_configs], ConvLSTM.get_init_keys())
+    reconstruct_configs = pack([num_layers, cell_configs], ConvLSTM.get_init_keys())
+    predict_configs = pack([num_layers, cell_configs], ConvLSTM.get_init_keys())
+
+    model_info = pack([encoder_configs, reconstruct_configs, predict_configs], _KEYS)
+    model_info['name'] = 'MMNIST_CONV_LSTM'
+
+    trainloader_info={
+        'file_addr':'./data/mmnist_train.npy',
+        'batch_size': 64,
         'shuffle': True,
-        'num_workers': 2,
-        'transform': None
+        'num_workers': 2
     }
 
-    valloader_info = {
-        'name': name,
-        'root': root,
-        'dataset': dataset,
-        'split_by': split_by,
-        'split': 'val',
-        'vocab': vocab,
-        'batch_size': 10,
+    valloader_info={
+        'file_addr':'./data/mmnist_val.npy',
+        'batch_size': 16,
         'shuffle': False,
-        'num_workers': 2,
-        'transform': None
+        'num_workers': 2
     }
 
-    testloader_info = None
-    model_info = {
-        'name': name,
-        'gnn_hid_dim': 1024,
-        'vis_dim': 512,
-        'vis_num': 50,
-        'image_size': 224,
-        'n_channels': 1,
-        'dr_decoder': 0.5,
-        'dr_embedding': 0.5,
-        'vocab_size': 4255,
-        'embed_dim': 512,
-        'lstm_hid_dim': 1024,
-        'lstm_fea_dim': 512,
-        'time_steps': 4,
-        'hid_init_method': 'average',
+    testloader_info = {
+        'file_addr': './data/mmnist_test.npy',
+        'batch_size': 16,
+        'shuffle': False,
+        'num_workers': 2
     }
-    criterion_info = {
-        'name': 'CVPR16_MMI',
-        'lamb': 1,
-        'margin': 1
+    seed = 666
+    folder_name = 'mmnist_convLSTM'
+    main_info={
+        'num_epochs': 60,
+        'halve_every': 10,
+        'log_dir': './logs/%s'%folder_name,
+        'save_dir': './checkpoints/%s'%folder_name
     }
 
     optimizer_info = {
         'lr': 1e-4,
         'optim_alg': 'Adam'
     }
-    seed = 666
-    folder_name = 'CAPTION_GNN_CONTRASTIVE'
-    main_info = {'name': name,
-                 'num_epochs': 50,
-                 'halve_every': 30,
-                 'save_dir': './checkpoints/%s'%folder_name,
-                 'log_dir': './logs/%s'%folder_name,
-                 'with_neg': False,
-                 'checkpoint': './checkpoints/%s/checkpoint.pth.tar'%folder_name,
-                 'test': False,
-                 # 'save': './vis/images/CAP_neginit_GNN_512.pth'
-                 }
-    hparams = HParams( trainloader_info=trainloader_info,
-                       valloader_info=valloader_info,
-                       testloader_info=testloader_info,
-                       model_info=model_info,
-                       criterion_info=criterion_info,
-                       optimizer_info=optimizer_info,
-                       main_info=main_info,
-                       seed=seed)
-    return hparams
 
+    hparams = HParams(trainloader_info=trainloader_info,
+                      valloader_info=valloader_info,
+                      testloader_info=testloader_info,
+                      model_info=model_info,
+                      optimizer_info=optimizer_info,
+                      main_info=main_info,
+                      seed=seed)
+    return hparams
 
 

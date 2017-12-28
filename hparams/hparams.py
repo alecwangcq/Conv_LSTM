@@ -1,4 +1,3 @@
-from misc.build_vocab import *
 class HParams(object):
 
     def __init__(self, **kwargs):
