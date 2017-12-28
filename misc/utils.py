@@ -27,9 +27,11 @@ def to_var(x, requires_grad=False):
 
 def get_optimizer(configs, parameters):
     _KEY = ['lr', 'optim_alg']
-    OPTIM = {'SGD': optim.SGD, 'Adam': optim.Adam}
+    OPTIM = {'SGD': optim.SGD, 'Adam': optim.Adam, 'RMSprop':optim.RMSprop}
     optim_alg = configs['optim_alg']
     lr = configs['lr']
+    weight_decay = configs['weight_decay']
+    momentum = configs['momentum']
     return OPTIM[optim_alg](parameters, lr)
 
 def adjust_learning_rate(optimizer, epoch, halveEvery=10):

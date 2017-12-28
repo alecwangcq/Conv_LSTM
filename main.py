@@ -18,18 +18,20 @@ def train(dataloader, model, optimizer, criterion, train_info):
     model.train()
     num_epochs = train_info['num_epochs']
     epoch = train_info['epoch']
+    clip = train_info['clip']
     total_steps = len(dataloader)
     for idx, (x_train, x_predict) in enumerate(dataloader):
         optimizer.zero_grad()
         x_train = to_var(x_train)
         x_predict = to_var(x_predict)
         data = pack([x_train, x_predict, None], ['x_train', 'x_predict', 'states'])
-        configs = pack([True, -1], ['use_gt', 'max_steps'])
+        configs = pack([False, 10], ['use_gt', 'max_steps'])
         reconstruct, predict = model(data, configs)
         r_loss = criterion(reconstruct, x_train)
         p_loss = criterion(predict, x_predict)
         loss = r_loss + p_loss
         loss.backward()
+        torch.nn.utils.clip_grad_norm(model.parameters(), clip)
         optimizer.step()
         logger.info('Epoch [%d/%d], Step [%d/%d], Reconstruct Loss: %5.4f, Predict Loss: %5.4f, Total: %5.4f' % (
             epoch, num_epochs, idx + 1, total_steps, r_loss.data[0], p_loss.data[0], loss.data[0]))
@@ -87,7 +89,7 @@ def main(hparams):
     for epoch in xrange(num_epochs):
         if train_loader is not None:
             adjust_learning_rate(optimizer, epoch, halve_every)
-            traininfo = {'epoch': epoch, 'num_epochs':num_epochs}
+            traininfo = {'epoch': epoch, 'num_epochs':num_epochs, 'clip':main_info['clip']}
             train(train_loader, model, optimizer, criterion, traininfo)
         if val_loader is not None:
             valinfo = {'epoch': epoch, 'num_epochs': num_epochs}

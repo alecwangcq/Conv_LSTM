@@ -10,7 +10,7 @@ from misc.utils import pack
 def MMNIST_CONV_LSTM(extra_info):
     _KEYS = ['encoder_configs', 'reconstruct_configs', 'predict_configs']
     h_c = 16
-    active_func = nn.Tanh()
+    active_func = nn.ReLU()
     in_c = 1
     in_h = 64
     in_w = 64
@@ -19,8 +19,8 @@ def MMNIST_CONV_LSTM(extra_info):
 
     num_layers = 3
     cell_conf_l0 = pack([h_c, active_func, in_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
-    cell_conf_l1 = pack([h_c, active_func, h_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
-    cell_conf_l2 = pack([h_c, active_func, h_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
+    cell_conf_l1 = pack([8, active_func, h_c, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
+    cell_conf_l2 = pack([8, active_func, 8, in_h, in_w, kernel_size, DEBUG], ConvLSTMCell.get_init_keys())
     cell_configs = [cell_conf_l0, cell_conf_l1, cell_conf_l2]
 
     encoder_configs = pack([num_layers, cell_configs], ConvLSTM.get_init_keys())
@@ -32,7 +32,7 @@ def MMNIST_CONV_LSTM(extra_info):
 
     trainloader_info={
         'file_addr':'./data/mmnist_train.npy',
-        'batch_size': 64,
+        'batch_size': 32,
         'shuffle': True,
         'num_workers': 2
     }
@@ -53,6 +53,7 @@ def MMNIST_CONV_LSTM(extra_info):
     seed = 666
     folder_name = 'mmnist_convLSTM'
     main_info={
+        'clip': 0.25,
         'num_epochs': 60,
         'halve_every': 10,
         'log_dir': './logs/%s'%folder_name,
@@ -61,7 +62,9 @@ def MMNIST_CONV_LSTM(extra_info):
 
     optimizer_info = {
         'lr': 1e-4,
-        'optim_alg': 'Adam'
+        'optim_alg': 'RMSprop',
+        'weight_decay': 0.9,
+        'momentum': 0
     }
 
     hparams = HParams(trainloader_info=trainloader_info,

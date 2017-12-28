@@ -24,6 +24,9 @@ class ConvLSTMCell(nn.Module):
                                 kernel_size=self.kernel_size,
                                 padding=(self.kernel_size-1)//2)
 
+        # if use bn
+        self.bn = nn.BatchNorm2d(4 * self.h_c)
+
         self.w_ci = nn.Parameter(torch.zeros(self.h_c, self.in_h, self.in_w))
         self.w_cf = nn.Parameter(torch.zeros(self.h_c, self.in_h, self.in_w))
         self.w_co = nn.Parameter(torch.zeros(self.h_c, self.in_h, self.in_w))
@@ -48,11 +51,10 @@ class ConvLSTMCell(nn.Module):
         x, states = unpack(data, _KEYS)
         h, c = states
         active_func = self.active_func
-        # print (x.size())
-        # print (h.size())
         concat_hx = torch.cat([x, h], 1)
         # print(concat_hx.size())
         conv_hx = self.conv2d(concat_hx)
+        conv_hx = self.bn(conv_hx)
         ai, af, ac, ao = torch.split(conv_hx, self.h_c, dim=1)
         # print (ai.size(), af.size(), ac.size(), ao.size())
         # print (c.size(), self.w_ci.size())

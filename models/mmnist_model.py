@@ -64,7 +64,10 @@ class Generator(ConvLSTM):
     def __init__(self, configs):
         super(Generator, self).__init__(configs)
         num_layers, h_c = configs['num_layers'], configs['cell_configs'][0]['h_c']
-        in_channels = num_layers * h_c
+        h_c_sum = 0
+        for conf in configs['cell_configs']:
+            h_c_sum += conf['h_c']
+        in_channels = h_c_sum
         out_channels = 1
         self.conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
                               kernel_size=1)
